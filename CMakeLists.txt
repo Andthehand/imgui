@@ -14,6 +14,8 @@ set(IMGUI_SRC
     imstb_rectpack.h
     imstb_textedit.h
     imstb_truetype.h
+    misc/cpp/imgui_stdlib.h
+    misc/cpp/imgui_stdlib.cpp
 )
 
 # Add backend files for GLFW + OpenGL3
