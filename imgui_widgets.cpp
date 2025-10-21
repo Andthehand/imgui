@@ -10658,17 +10658,28 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
             ImVec2 tl = bb.GetTL() + ImVec2(0, 1.0f * g.CurrentDpiScale);
             ImVec2 tr = bb.GetTR() + ImVec2(0, 1.0f * g.CurrentDpiScale);
             ImU32 overline_col = GetColorU32(tab_bar_focused ? ImGuiCol_TabSelectedOverline : ImGuiCol_TabDimmedSelectedOverline);
-            if (style.TabRounding > 0.0f)
-            {
-                float rounding = style.TabRounding;
-                display_draw_list->PathArcToFast(tl + ImVec2(+rounding, +rounding), rounding, 7, 9);
-                display_draw_list->PathArcToFast(tr + ImVec2(-rounding, +rounding), rounding, 9, 11);
-                display_draw_list->PathStroke(overline_col, 0, style.TabBarOverlineSize);
-            }
-            else
-            {
-                display_draw_list->AddLine(tl - ImVec2(0.5f, 0.5f), tr - ImVec2(0.5f, 0.5f), overline_col, style.TabBarOverlineSize);
-            }
+
+            ImU32 colOpaque = overline_col;
+            ImU32 colTransparent = ((colOpaque & 0x0FFFFFFF) | (0x00 << 28)); // zero alpha
+
+            // corners: top-left, top-right, bottom-right, bottom-left
+            display_draw_list->AddRectFilledMultiColor(
+                tl,
+                ImVec2(((tr.x - tl.x) / 2.0f) + tl.x, tr.y + style.TabBarOverlineSize),
+                colTransparent,   // top-left
+                colOpaque,        // top-right
+                colOpaque,        // bottom-right
+                colTransparent    // bottom-left
+            );
+
+            display_draw_list->AddRectFilledMultiColor(
+                ImVec2(((tr.x - tl.x) / 2.0f) + tl.x, tl.y),
+                ImVec2(tr.x, tr.y + style.TabBarOverlineSize),
+                colOpaque,        // top-left
+                colTransparent,   // top-right
+                colTransparent,   // bottom-right
+                colOpaque         // bottom-left
+            );
         }
         RenderNavCursor(bb, id);
 
